@@ -1,8 +1,15 @@
-from fastapi import APIRouter, Request
-from fastapi.responses import RedirectResponse, HTMLResponse
+from fastapi import Depends, APIRouter, Request
+from fastapi.responses import RedirectResponse
+from fastapi.encoders import jsonable_encoder
 from starlette.config import Config
 from authlib.integrations.starlette_client import OAuth, OAuthError
 from settings import Settings
+
+from sqlalchemy.orm import Session
+
+from crud.crud_user import get_user_by_email, create_user
+from dependencies import get_db
+from schemas import User
 
 router = APIRouter(
     prefix="/auth",
@@ -40,15 +47,24 @@ async def login(request: Request):
 
 
 @router.get('/auth')
-async def auth(request: Request):
+async def auth(request: Request, db: Session = Depends(get_db)):
     try:
         token = await oauth.google.authorize_access_token(request)
     except OAuthError as error:
-        return HTMLResponse(f'<h1>{error}</h1>')
-    user = token.get('userinfo')
+        raise error
+    user = token['userinfo']
     if user:
-        print(request.session['user'])
-        request.session['user'] = dict(user)
+        db_user = get_user_by_email(db=db, email=user['email'])
+        if db_user:
+            json_user = jsonable_encoder(db_user)
+        else:
+            user_schema = User()
+            user_schema.email = user['email']
+            user_schema.first_name = user['given_name']
+            user_schema.last_name = user['family_name']
+            user_schema.profile_picture_url = user['profile_picture']
+            db_user = create_user(db=db, user=user_schema)
+        request.session['user'] = json_user
     return RedirectResponse(url='/')
 
 

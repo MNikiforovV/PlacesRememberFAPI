@@ -3,20 +3,12 @@ from routers import general, users, auth
 from starlette.middleware.sessions import SessionMiddleware
 import models
 from settings import Settings
-from database import SessionLocal, engine
+from database import engine
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 settings = Settings()
-
-
-def get_db():
-    db = SessionLocal()
-    try:
-        yield db
-    finally:
-        db.close()
 
 
 app.include_router(auth.router)

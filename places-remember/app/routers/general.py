@@ -9,9 +9,10 @@ templates = Jinja2Templates(directory="templates")
 
 @router.get("/", response_class=HTMLResponse)
 async def root(request: Request):
+    user = request.session.get('user')
     return templates.TemplateResponse(
         "general/index.html",
-        {"request": request}
+        {"request": request, "user": user}
     )
 
 
