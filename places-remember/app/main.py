@@ -1,16 +1,21 @@
 from fastapi import FastAPI
-from routers import general, users, auth
+from fastapi.staticfiles import StaticFiles
+
 from starlette.middleware.sessions import SessionMiddleware
-import models
-from settings import Settings
-from database import engine
+
+from .routers import general, users, auth, places
+from . import models
+from .settings import Settings
+from .database import engine
 
 models.Base.metadata.create_all(bind=engine)
 
 app = FastAPI()
 settings = Settings()
 
+app.mount('/static', StaticFiles(directory="app/static"), name="static")
 
+app.include_router(places.router)
 app.include_router(auth.router)
 app.include_router(general.router)
 app.include_router(users.router)
