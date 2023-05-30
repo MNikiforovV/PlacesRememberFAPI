@@ -1,6 +1,6 @@
 from typing import Annotated, Optional
 
-from fastapi import Depends, APIRouter, Request, Form
+from fastapi import Depends, APIRouter, Request, Form, HTTPException
 from fastapi.responses import RedirectResponse
 from sqlalchemy.orm import Session
 from fastapi.templating import Jinja2Templates
@@ -19,6 +19,8 @@ router = APIRouter(
 )
 
 
+# Method renders template place.html, gets information about place by
+# place id and sends it to template.
 @router.get("/get-place/{place_id}")
 async def get_places(
     request: Request,
@@ -27,13 +29,21 @@ async def get_places(
     user: Optional[dict] = Depends(get_user)
 ):
     place = get_place_by_id(db=db, place_id=place_id)
-    is_view = True
-    return templates.TemplateResponse(
-        "general/place.html",
-        {"request": request, "user": user, "is_view": is_view, "place": place}
-    )
+    if place:
+        is_view = True
+        return templates.TemplateResponse(
+            "general/place.html",
+            {
+                "request": request,
+                "user": user,
+                "is_view": is_view,
+                "place": place
+            }
+        )
+    raise HTTPException(status_code=404, detail="Place not found")
 
 
+# Method renders page with add place form.
 @router.get("/add-place")
 async def add_place_page(
     request: Request,
@@ -45,6 +55,8 @@ async def add_place_page(
     )
 
 
+# Method creates new place using informaion from page form,
+# then redirects to main.
 @router.post("/add-place")
 async def add_place(
     request: Request,
@@ -66,4 +78,6 @@ async def add_place(
         place=place,
         db=db
     )
-    return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    if _:
+        return RedirectResponse(url="/", status_code=status.HTTP_302_FOUND)
+    raise HTTPException(status_code=502, detail="Unable to add place")

@@ -12,6 +12,8 @@ router = APIRouter()
 templates = Jinja2Templates(directory="app/templates")
 
 
+# Method renders main page. If user exists gets it's places data and
+# sends it to template
 @router.get("/", response_class=HTMLResponse)
 async def root(request: Request, db: Session = Depends(get_db)):
     user = request.session.get('user')

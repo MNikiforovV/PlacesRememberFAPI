@@ -43,12 +43,17 @@ oauth.register(
 )
 
 
+# Method sends request to google api,
+# returns redirect to google login page
 @router.get('/login')
 async def login(request: Request):
     redirect_uri = request.url_for('auth')
     return await oauth.google.authorize_redirect(request, str(redirect_uri))
 
 
+# Method requests google access token and retrieves user information from it
+# Then if user exists in database redirects to main page,
+# if not creates new user in database with information from google token
 @router.get('/auth')
 async def auth(request: Request, db: Session = Depends(get_db)):
     try:
@@ -71,6 +76,7 @@ async def auth(request: Request, db: Session = Depends(get_db)):
     return RedirectResponse(url='/')
 
 
+# Method deletes user information from session, then redirects to main.
 @router.get('/logout')
 async def logout(request: Request):
     request.session.pop('user', None)

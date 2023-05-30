@@ -4,10 +4,12 @@ from ..models import User as UserModel
 from ..schemas import User as UserSchema
 
 
+# Method returns user by email from database.
 def get_user_by_email(db: Session, email: str):
     return db.query(UserModel).filter(UserModel.email == email).first()
 
 
+# Method creates user in database with pydantic user schema.
 def create_user(db: Session, user: UserSchema):
     db_user = UserModel()
     db_user.email = user.email
