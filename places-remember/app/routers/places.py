@@ -62,7 +62,7 @@ async def add_place(
         longitude=longitude,
         author_id=user['id'],
     )
-    db_post = create_place(
+    _ = create_place(
         place=place,
         db=db
     )

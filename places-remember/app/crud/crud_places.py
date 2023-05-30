@@ -18,8 +18,3 @@ def create_place(db: Session, place: PlaceSchema):
     db.commit()
     db.refresh(db_place)
     return db_place
-
-
-def edit_place(db: Session, place: PlaceSchema, place_id: int):
-    # place_to_edit = get_place_by_id(db=db, place_id=place.id)
-    pass
