@@ -1,0 +1,29 @@
+version: '3.1'
+
+services:
+
+  postgres:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_PASSWORD: 1111
+    ports:
+      - 5432:5432
+    env_file:
+      - docker.env
+    networks:
+      - postgres
+
+  pgadmin:
+    image: dpage/pgadmin4
+    restart: always
+    ports:
+      - 8080:8080
+    env_file:
+      - docker.env
+    networks:
+      - postgres
+  
+networks:
+  postgres:
+    driver: bridge
